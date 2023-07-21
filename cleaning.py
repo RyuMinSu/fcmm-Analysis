@@ -77,7 +77,7 @@ for idx in writer_options:
     df.loc[idx, 'writer_option'] = str(df.loc[idx, 'writer_option']).replace('cm', '').replace('kg', '')
 
     #content 숫자와 영어 제거
-    df.loc[idx, 'content'] = re.sub('[^가-힣]', '', str(df.loc[idx, 'content']))
+    df.loc[idx, 'content'] = re.sub('[^가-힣 ]', '', str(df.loc[idx, 'content']))
 
 
 df.to_excel(writer, sheet_name='cleaning2')
