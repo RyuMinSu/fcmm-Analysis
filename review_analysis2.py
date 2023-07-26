@@ -31,28 +31,38 @@ words_list = []
 cv = CountVectorizer() #객체선언
 
 # 댓글 하나당 명사추출 후 문자열로 저장
-# senetence_num = final_df.shape[0]
-sentence_num = 5000
+sentence_num = final_df.shape[0]
+# sentence_num = 1000
 dtm_array, all_features = get_dtm_array(final_df, okt, cv, sentence_num, words_list)
-
-#분리된 모든 명사 txt파일로 저장
-# np.savetxt('result/all_words.txt', all_features, fmt='%s', delimiter=',', header='all_words', encoding='utf-8')
+#
+# #분리된 모든 명사 txt파일로 저장
+# # np.savetxt('result/all_words.txt', all_features, fmt='%s', delimiter=',', header='all_words', encoding='utf-8')
 
 #dtm 저장
 dtm_df = pd.DataFrame(dtm_array, columns=all_features) #데이터프레임 변환
 print(f"original dtm_df shape: {dtm_df.shape}")
 
+
+#-----불용어 가져오기
+stopwords_file = open('result/stopwords.txt', 'r', encoding='utf-8')
+stopwords_list = []
+for line in stopwords_file.readlines()[1:]:
+    stopwords_list.append(line.strip())
+stopwords_file.close()
+stopwords_list = [word for i, word in enumerate(stopwords_list) if not stopwords_list[i]==""]
+
+
+#-----불용어 컬럼에서 제거
+dtm_df = dtm_df.drop(stopwords_list, axis='columns')
+print(f"remove stopwords dtm_df shape: {dtm_df.shape}")
+
+
+#-----실제 dtm_df
 real_col = [col for col in list(dtm_df) if dtm_df[col].sum() > 1]
 dtm_df = dtm_df[real_col]
 print(f"real dtm_df shape: {dtm_df.shape}")
-
-# dtm_df.to_sql(name="dtm", con=engine, index=False, if_exists="replace")
-
-#각 단어빈도 저장
-# freq_df = get_words_freq(dtm_df, all_features)
-# freq_df.to_sql(name="word_freq", con=engine, index=False, if_exists='replace')
-# print(freq_df.shape)
-# print('완료')
+# db저장
+dtm_df.to_sql(name="dtm", con=engine, index=False, if_exists="replace")
 
 
 
